@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <title>Mooth's Url Shortener</title>
+</head>
+<body>
+  <form id="form">
+    <input id="short-input" type="text">
+    <input id="url-input"   type="text">
+    <button type="submit">Shorten</button>
+  </form>
+  <script>
+    const form = document.querySelector("#form")
+    const shortInput = document.querySelector("#short-input")
+    const urlInput = document.querySelector("#url-input")
+    form.addEventListener("submit", e=> {
+      e.preventDefault()
+      fetch("http://localhost:3000/url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "short": shortInput.value,
+          "url": urlInput.value,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => console.log(data))
+    })
+  </script>
+</body>
+</html>
