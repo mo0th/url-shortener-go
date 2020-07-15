@@ -5,16 +5,38 @@ import (
 	"github.com/alioygur/is"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"os"
 	"strings"
 )
 
 type ShortUrl struct {
-	Short string `json:"short"`
+	gorm.Model
+	Short string `json:"short" gorm:"unique_index:short"`
 	Url   string `json:"url"`
 }
 
+func findShortUrl(db *gorm.DB, short string) *ShortUrl {
+	res := new(ShortUrl)
+	db.Where("short = ?", short).First(res)
+
+	if res.Short == "" || res.Url == "" {
+		return nil
+	}
+
+	return res
+}
+
 func main() {
+	db, err := gorm.Open("sqlite3", "./urls.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	db.AutoMigrate(&ShortUrl{})
+
 	app := fiber.New()
 
 	urls := make(map[string]ShortUrl)
@@ -26,14 +48,18 @@ func main() {
 	api := app.Group("/")
 
 	api.Get("/:short", func(c *fiber.Ctx) {
-		val, ok := urls[c.Params("short")]
 
-		if ok {
-			c.Redirect(val.Url)
+		res := findShortUrl(db, c.Params("short"))
+
+		if res == nil {
+			c.Status(404).JSON(fiber.Map{
+				"success": false,
+				"message": "Short not found",
+			})
 			return
 		}
 
-		c.Status(404).Send("Not Found")
+		c.Redirect(res.Url)
 	})
 
 	api.Post("/", func(c *fiber.Ctx) {
@@ -67,7 +93,22 @@ func main() {
 		}
 
 		urls[shortUrl.Short] = *shortUrl
-		c.JSON(shortUrl)
+
+		if findShortUrl(db, shortUrl.Short) != nil {
+			c.Status(400).JSON(fiber.Map{
+				"success": false,
+				"message": "Short already in use",
+			})
+			return
+		}
+
+		db.Create(shortUrl)
+
+		c.JSON(fiber.Map{
+			"success": true,
+			"short":   shortUrl.Short,
+			"url":     shortUrl.Url,
+		})
 	})
 
 	app.Static("/", "./public/")
