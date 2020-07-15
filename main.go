@@ -39,8 +39,6 @@ func main() {
 
 	app := fiber.New()
 
-	urls := make(map[string]ShortUrl)
-
 	if os.Getenv("GO_ENV") != "production" {
 		app.Use(middleware.Logger())
 	}
@@ -91,8 +89,6 @@ func main() {
 		if !strings.HasPrefix(shortUrl.Url, "http://") || !strings.HasPrefix(shortUrl.Url, "https://") {
 			shortUrl.Url = fmt.Sprintf("%s%s", "https://", shortUrl.Url)
 		}
-
-		urls[shortUrl.Short] = *shortUrl
 
 		if findShortUrl(db, shortUrl.Short) != nil {
 			c.Status(400).JSON(fiber.Map{
