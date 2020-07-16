@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-size: calc(1rem + 8vmin);
+  --font-weight: 700;
+  --font-family: 'Poppins', sans-serif;
+  --font-color: #f8f8f2;
+  --bg-body: #282a36;
+  --bg-selection: #44475a;
+  --footer-font-size: calc(0.5rem + 2vmin);
+}
+
+::selection {
+  background: var(--bg-selection);
+}
+
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg-body);
+  display: flex;
+  flex-direction: column;
+}
+
+main, footer {
+  margin: 0 auto;
+  max-width: 1000px;
+  width: calc(100% - 1rem);
+}
+
+main {
+  flex-grow: 1;
+}
+
+footer {
+  color: #6272a4;
+  font-size: var(--footer-font-size);
+  padding-bottom: 1rem;
+  text-align: center;
+}
+
+footer a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #6272a4;
+  transition: filter 200ms;
+}
+
+footer a:hover {
+  filter: brightness(1.2);
+}
+
+footer svg {
+  margin-right: 0.5rem;
+  width: var(--footer-font-size);
+  height: var(--footer-font-size);
+}
+
+input, button, body {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+}
+
+input, button {
+  display: block;
+  border: none;
+  padding: 0.5rem;
+}
+
+input {
+  background: none;
+  color: var(--font-color);
+  width: 100%;
+}
+
+input:focus {
+  outline: none;
+}
+
+input:placeholder-shown {
+  color: #6272a4;
+}
+
+button {
+  background: linear-gradient(45deg,  #8be9fd, #bd93f9, #ff79c6);
+  background-clip: text;
+  background-position: left;
+  background-size: 200%;
+  color: transparent;
+  cursor: pointer;
+  transition: background-position 200ms;
+}
+
+@media (max-width: 600px) {
+  button {
+    background-clip: padding-box;
+    color: var(--bg-body);
+  }
+}
+
+button:hover {
+  background-position: right;
+}
+
+button:focus {
+  outline: none;
+}
+
+#error, #success {
+  padding: 0 0.5rem;
+  font-weight: var(--font-weight);
+  text-transform: lowercase;
+}
+
+#error {
+  color: #ff5555;
+}
+
+#success, main > a {
+  color: #50fa7b;
+}
+
+.hidden {
+  display: none !important;
+}
