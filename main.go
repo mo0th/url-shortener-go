@@ -139,5 +139,10 @@ func main() {
 		})
 	})
 
-	app.Listen(3000)
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "3000"
+	}
+
+	app.Listen(PORT)
 }
