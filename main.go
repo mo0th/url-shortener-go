@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/alioygur/is"
+	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"os"
-	"strings"
 )
 
 type ShortUrl struct {
@@ -28,7 +32,19 @@ func findShortUrl(db *gorm.DB, short string) *ShortUrl {
 	return res
 }
 
+var allowedRunes = []rune("abcdefghijklmnoprstuvqxyzABCDEFGHIJKLMNOPQRSTUVWXYX123456789")
+
+func randShort(length int) string {
+	res := make([]rune, length)
+	numRunes := len(allowedRunes)
+	for i := range res {
+		res[i] = allowedRunes[rand.Intn(numRunes)]
+	}
+	return string(res)
+}
+
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	db, err := gorm.Open("sqlite3", "./urls.db")
 	if err != nil {
 		panic(err)
@@ -38,6 +54,8 @@ func main() {
 	db.AutoMigrate(&ShortUrl{})
 
 	app := fiber.New()
+	app.Use(cors.New())
+	app.Static("/", "./public/")
 
 	if os.Getenv("GO_ENV") != "production" {
 		app.Use(middleware.Logger())
@@ -67,11 +85,25 @@ func main() {
 			return
 		}
 
+		// Make random short
+		if shortUrl.Short == "" {
+			shortUrl.Short = randShort(5)
+		}
+
 		// Check short length
-		if len(shortUrl.Short) < 2 || len(shortUrl.Short) > 8 {
+		if (len(shortUrl.Short) < 2) || len(shortUrl.Short) > 8 {
 			c.Status(406).JSON(fiber.Map{
 				"success": false,
-				"message": "Short must be between 2 and 8 long.",
+				"message": "Short must be between 2 and 8 long",
+			})
+			return
+		}
+
+		// Check that short only contains alphanumeric characters
+		if !is.Alphanumeric(shortUrl.Short) {
+			c.Status(406).JSON(fiber.Map{
+				"success": false,
+				"message": "Short can only contain alphanumeric characters",
 			})
 			return
 		}
@@ -106,8 +138,6 @@ func main() {
 			"url":     shortUrl.Url,
 		})
 	})
-
-	app.Static("/", "./public/")
 
 	app.Listen(3000)
 }
