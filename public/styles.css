@@ -87,7 +87,7 @@ input:focus {
   outline: none;
 }
 
-input:placeholder-shown {
+input:placeholder-shown, ::-webkit-input-placeholder {
   color: #6272a4;
 }
 
