@@ -6,7 +6,9 @@ const sucDiv = document.getElementById("success")
 const resInput = document.getElementById("result")
 const tryLink = document.getElementById("try")
 
-const API_URL = "http://192.168.1.107:3000/"
+const API_URL = "http://192.168.1.103:3000/"
+
+urlInput.focus()
 
 function showSuccessStuff(isSuccess) {
   sucDiv.classList[isSuccess ? "remove" : "add"]("hidden")
