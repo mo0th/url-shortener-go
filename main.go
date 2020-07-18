@@ -32,7 +32,7 @@ func findShortUrl(db *gorm.DB, short string) *ShortUrl {
 	return res
 }
 
-var allowedRunes = []rune("abcdefghijklmnoprstuvqxyzABCDEFGHIJKLMNOPQRSTUVWXYX123456789")
+var allowedRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 func randShort(length int) string {
 	res := make([]rune, length)
@@ -54,12 +54,13 @@ func main() {
 	db.AutoMigrate(&ShortUrl{})
 
 	app := fiber.New()
-	app.Use(cors.New())
-	app.Static("/", "./public/")
 
 	if os.Getenv("GO_ENV") != "production" {
 		app.Use(middleware.Logger())
 	}
+
+	app.Use(cors.New())
+	app.Static("/", "./public/")
 
 	api := app.Group("/")
 
@@ -88,6 +89,9 @@ func main() {
 		// Make random short
 		if shortUrl.Short == "" {
 			shortUrl.Short = randShort(5)
+			for findShortUrl(db, shortUrl.Short) != nil {
+				shortUrl.Short = randShort(5)
+			}
 		}
 
 		// Check short length
