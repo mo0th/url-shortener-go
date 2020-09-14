@@ -24,12 +24,13 @@ func main() {
 
 	app := fiber.New()
 
-	if os.Getenv("GO_ENV") != "production" {
-		app.Use(middleware.Logger())
-	}
+	app.Use(middleware.Logger())
 
 	app.Use(cors.New())
-	app.Static("/", "./public/")
+
+	if os.Getenv("NO_PUBLIC") != "true" {
+		app.Static("/", "./public/")
+	}
 
 	api := app.Group("/")
 
